@@ -42,20 +42,32 @@ async function run() {
         // Sort matched documents in descending order by rating
         // sort: { "imdb.rating": -1 },
         // Include only the `title` and `imdb` fields in the returned document
-        projection: { title: 1, price: 1, service_id: 1,img:1 },
+        projection: { title: 1, price: 1, service_id: 1, img: 1 },
       };
-     const result = await serviceCollection.findOne(query,options);
+      const result = await serviceCollection.findOne(query, options);
       res.send(result);
     });
 
+    //bookings
+//new focus start ===========================================================
+    app.get("/bookings", async (req, res) => {
+      // console.log(req.query);
+      // console.log(req.query.email);
+      let query = {}
 
-//bookings
-app.post('/bookings', async (req, res) =>{
-  const booking =req.body
-  // console.log(booking);
-  const result = await bookingCollection.insertOne(booking)
-  res.send(result);
-})
+      if(req.query?.email){
+        query = {email: req.query.email}
+      }
+      const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+    });
+//new focus end =============================================================
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      // console.log(booking);
+      const result = await bookingCollection.insertOne(booking);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     client.db("admin").command({ ping: 1 });
