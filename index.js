@@ -1,5 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require('cookie-parser')
+var jwt = require("jsonwebtoken");
+
 const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -7,8 +10,15 @@ require("dotenv").config();
 // console.log(process.env.DB_USER)
 
 //middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173","http://localhost:5174"],
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser())
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@carsdoctorcluster.awokmhe.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -29,12 +39,38 @@ async function run() {
     const serviceCollection = client.db("carDoctor").collection("services");
     const bookingCollection = client.db("carDoctor").collection("bookings");
 
+    //auth related api
+    // new jwt and cookie parser (start) ===============================================================
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      //token generate
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false, //http://localhost:5173/login
+          // sameSite:"none", // http://localhost:5173/  vs  http://localhost:5000/
+          // maxAge:
+        })
+        .send({ success: true });
+      //then go to top and change middleware
+      //go to login at client side
+    });
+    // new jwt and cookie parser (end) ===============================================================
+
+    //services related api
+
     app.get("/services", async (req, res) => {
       const cursor = serviceCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
+    // new projection (start) =======================================================
     app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -43,17 +79,20 @@ async function run() {
         // sort: { "imdb.rating": -1 },
         // Include only the `title` and `imdb` fields in the returned document
         projection: { title: 1, price: 1, service_id: 1, img: 1 },
+        // projection: { _id:0, title: 0, price: 0, service_id: 0, img: 0 },
       };
       const result = await serviceCollection.findOne(query, options);
       res.send(result);
     });
+    // new projection (end) =============================================================
 
-    //bookings
+    //bookings related api
 
     //new focus start (query) ===========================================================
     app.get("/bookings", async (req, res) => {
       // console.log(req.query);
       // console.log(req.query.email);
+      console.log('tok tok token', req.cookies.token);
       let query = {};
 
       if (req.query?.email) {
