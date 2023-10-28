@@ -50,7 +50,7 @@ async function run() {
 
     //bookings
 
-    //new focus start ===========================================================
+    //new focus start (query) ===========================================================
     app.get("/bookings", async (req, res) => {
       // console.log(req.query);
       // console.log(req.query.email);
@@ -63,12 +63,26 @@ async function run() {
       res.send(result);
       //then go to Bookings.jsx line no 9
     });
-    //new focus end =============================================================
+    //new focus end (query) =============================================================
 
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
       // console.log(booking);
       const result = await bookingCollection.insertOne(booking);
+      res.send(result);
+    });
+
+    app.patch("/bookings/:id", async function (req, res) {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedBooking = req.body;
+      // console.log(updatedBooking);
+      const updateDoc = {
+        $set: {
+          status: updatedBooking.status,
+        },
+      };
+      const result = await bookingCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
