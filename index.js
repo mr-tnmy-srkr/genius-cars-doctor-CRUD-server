@@ -76,7 +76,7 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false, //http://localhost:5173/login
+          secure: true, //http://localhost:5173/login
           // sameSite:"none", // http://localhost:5173/  vs  http://localhost:5000/
           // maxAge:
         })
@@ -180,3 +180,14 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Cars server app listening on port ${port}`);
 });
+
+
+// Logout
+/* app.get('/logout', async (req, res) => {
+  try {
+    res.clearCookie('token').send({ success: true })
+    console.log('Logout successful')
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}) */
