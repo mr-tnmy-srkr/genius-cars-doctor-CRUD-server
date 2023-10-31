@@ -36,7 +36,7 @@ const logger = async (req, res, next) => {
   console.log("called", req.hostname, req.originalUrl);
   next();
 };
-const verifyToken = async (req, res, next) => {
+const voken = async (req, res, next) => {
   const token = req.cookies?.token;
   console.log("value of token in middleware", token);
   if (!token) {
@@ -68,7 +68,7 @@ async function run() {
     app.post("/jwt", logger, async (req, res) => {
       const user = req.body;
       console.log(user);
-      //token generate
+      //token generate by jwt documentation
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
@@ -119,9 +119,9 @@ async function run() {
       // console.log('tok tok token', req.cookies.token);
       console.log("user in the valid token from (verifyToken)", req.user);
 
-if(req.query.email!== req.user.email) {
-  return res.status(403).send({message: 'forbidden access'})
-}
+      if (req.query.email !== req.user.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
 
       let query = {};
       if (req.query?.email) {
@@ -180,7 +180,6 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Cars server app listening on port ${port}`);
 });
-
 
 // Logout
 /* app.get('/logout', async (req, res) => {
