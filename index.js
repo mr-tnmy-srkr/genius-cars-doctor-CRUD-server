@@ -36,7 +36,7 @@ const logger = async (req, res, next) => {
   console.log("called", req.hostname, req.originalUrl);
   next();
 };
-const voken = async (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const token = req.cookies?.token;
   console.log("value of token in middleware", token);
   if (!token) {
